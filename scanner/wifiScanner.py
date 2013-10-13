@@ -19,7 +19,7 @@
 import subprocess
 import threading
 import time
-import gps
+from gps import *
 import os
 import sys
 from os import path
@@ -65,7 +65,7 @@ class wifiScanner(threading.Thread):
 		self.wifiNetworks = wifiNetworks
 		self.interval = interval
 		self.setWirelessInterface(None)
-		self.session = gps.gps()
+		self.session = gps(mode=WATCH_ENABLE)
 		self.scanning = False
 		threading.Thread.__init__(self)
 		
@@ -89,8 +89,9 @@ class wifiScanner(threading.Thread):
 	def getGPSData(self):
 		#	Get GPS data from gpsd 
 		# a = altitude, d = date/time, m=mode,
-    		# o=postion/fix, s=status, y=satellites
-		self.session.query('o')    		
+    # o=postion/fix, s=status, y=satellites
+		#self.session.query('o')    		
+		self.session.next()
 		longtitude = self.session.fix.longitude
 		latitude = self.session.fix.latitude
 		return (longtitude, latitude)
