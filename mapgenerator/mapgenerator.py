@@ -201,19 +201,18 @@ ul.properties{
     <script type="text/javascript">
 	// <!--
         var map;
+        
+        var fromProjection = new OpenLayers.Projection("EPSG:4326");   // Transform from WGS 1984
+        var toProjection   = new OpenLayers.Projection("EPSG:900913"); // to Spherical Mercator Projection
  
         function init(){
             map = new OpenLayers.Map('map',
                     { maxExtent: new OpenLayers.Bounds(-20037508.34,-20037508.34,20037508.34,20037508.34),
                       numZoomLevels: 18,
                       maxResolution: 156543.0399,
-                      units: 'm',
-                      projection: new OpenLayers.Projection("EPSG:900913"),
-                      displayProjection: new OpenLayers.Projection("EPSG:4326")
+                      units: 'm'
                     });
-            var yahooLayer = new OpenLayers.Layer.Yahoo( "Yahoo");
- 
-            map.addLayer(yahooLayer);
+            map.addLayer(new OpenLayers.Layer.OSM());
             
             var markers = new OpenLayers.Layer.Markers( "Markers" );
 	    map.addLayer(markers);\n\n\n\n'''
@@ -259,12 +258,12 @@ ul.properties{
 			
 		tempStr = '''\n\n\n\n            map.addControl(new OpenLayers.Control.LayerSwitcher());
  
-            var lonLat = new OpenLayers.LonLat('''+centerLon+", "+centerLat+''');
+            var lonLat = new OpenLayers.LonLat('''+centerLon+", "+centerLat+''').transform( fromProjection, toProjection);
             if (!map.getCenter()) map.setCenter (lonLat, 16);
         }
         
         function setMarker(markers, lon, lat, contentHTML, icon){
-		var lonLatMarker = new OpenLayers.LonLat(lon, lat);
+		var lonLatMarker = new OpenLayers.LonLat(lon, lat).transform( fromProjection, toProjection);
 		var feature = new OpenLayers.Feature(markers, lonLatMarker);
 		feature.closeBox = true;
 		feature.popupClass = OpenLayers.Class(OpenLayers.Popup.FramedCloud, {minSize: new OpenLayers.Size(300, 180) } );
@@ -352,7 +351,7 @@ ul.properties{
 		tempStr = str(stats[1])
 		outputFile.write(tempStr.encode('utf-8'))
 		tempStr = ''');
-            g.labels = {0: '1', 1: '2', 2: '3', 3: '4', 4: '5', 5: '6', 7: '8', 8: '9', 9: '10', 10: '11'};
+            g.labels = {0: '1', 1: '2', 2: '3', 3: '4', 4: '5', 5: '6', 7: '8', 8: '9', 9: '10', 10: '11', 11: '12', 12: '13', 13: '14'};
 
             g.draw();
         </script>
@@ -429,12 +428,12 @@ class Stats:
 				if(len(nois.childNodes)>0):
 					noise = nois.childNodes[0].nodeValue
 			
-			entry = [essid, int(channel), quality, security, address, frequency, int(signal), int(noise), float(latitude), float(longtitude)]
+			entry = [essid, int(channel), quality, security, address, frequency, signal, noise, float(latitude), float(longtitude)]
 			self.networks.append(entry)
 			
 	
 	def runStats(self, minDistance):
-		self.channelsCounter = [0,0,0,0,0,0,0,0,0,0,0]
+		self.channelsCounter = [0,0,0,0,0,0,0,0,0,0,0,0,0,0]
 		self.total = len(self.networks)
 		for network in self.networks:			
 			chn = network[1]
